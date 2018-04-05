@@ -141,13 +141,20 @@ public class PersistenceResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/items")
+    @Path("/itemsyes")
     @Produces({ MediaType.APPLICATION_JSON })
     @ApiOperation(value = "Gets a list of items available via a specific persistence service.", response = String.class, responseContainer = "List")
     @ApiResponses(value = @ApiResponse(code = 200, message = "OK", response = String.class, responseContainer = "List"))
     public Response httpGetPersistenceServiceItems(@Context HttpHeaders headers,
             @ApiParam(value = "Id of the persistence service. If not provided the default service will be used", required = false) @QueryParam("serviceId") String serviceId) {
         return getServiceItemList(serviceId);
+    }
+
+    @GET
+    @Path("/hello")
+    @Produces({ MediaType.TEXT_PLAIN })
+    public Response echo(@QueryParam("message") String message) {
+	return Response.ok().entity(message == null ? "no message" : message).build();	
     }
 
     @GET
