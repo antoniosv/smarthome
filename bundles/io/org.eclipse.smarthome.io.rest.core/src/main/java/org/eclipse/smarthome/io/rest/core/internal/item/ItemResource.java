@@ -83,6 +83,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+import io.swagger.annotations.AuthorizationScope;
 
 /**
  * <p>
@@ -172,7 +174,10 @@ public class ItemResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "Get all available items.", response = EnrichedItemDTO.class, responseContainer = "List")
+<<<<<<< HEAD:bundles/io/org.eclipse.smarthome.io.rest.core/src/main/java/org/eclipse/smarthome/io/rest/core/internal/item/ItemResource.java
+    @ApiOperation(value = "Get all available items.", response = EnrichedItemDTO.class, responseContainer = "List", authorizations = {
+            @Authorization(value = "oauth2", scopes = {
+                    @AuthorizationScope(scope = "items", description = "List items and read their states") }) })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = EnrichedItemDTO.class, responseContainer = "List") })
     public Response getItems(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @ApiParam(value = "language") String language,

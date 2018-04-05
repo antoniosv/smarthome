@@ -10,10 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.smarthome.io.rest.auth.internal;
+package org.eclipse.smarthome.io.rest.auth;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.smarthome.core.auth.Authentication;
@@ -45,6 +47,10 @@ public class SmartHomePrincipal implements Principal {
 
     public Set<String> getRoles() {
         return new HashSet<>(authentication.getRoles());
+    }
+
+    public Map<String, Object> getClaims() {
+        return new HashMap<String, Object>(authentication.getClaims());
     }
 
 }
