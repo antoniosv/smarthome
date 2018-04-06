@@ -231,6 +231,14 @@ public class ThingResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed("admin")
+    @Path("/hello")    
+    @Produces({ MediaType.TEXT_PLAIN })
+    public Response echo(@QueryParam("message") String message) {
+	return Response.ok().entity(message == null ? "no message" : message).build();	
+    }
+    
+    @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}")
     @Produces(MediaType.APPLICATION_JSON)
