@@ -79,7 +79,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
     }
 
     private Authentication getAuthentication(String name, Subject subject) {
-        return new Authentication(name, getRoles(subject.getPrincipals()), null);
+        return new Authentication(name, getRoles(subject.getPrincipals()));
     }
 
     private String[] getRoles(Set<Principal> principals) {

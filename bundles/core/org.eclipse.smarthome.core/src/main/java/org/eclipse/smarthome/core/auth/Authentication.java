@@ -49,10 +49,11 @@ public class Authentication {
      * @param username name of the user associated to this authentication instance
      * @param roles a variable list of roles that the user possesses.
      */
-    public Authentication(String username, String[] roles, Map<String, Object> claims) {
+    public Authentication(String username, String[] roles) {
+	// additional parameter: Map<String, Object> claims
         this.username = username;
         this.roles = new HashSet<>(Arrays.asList(roles));
-        this.claims = new HashMap<String, Object>(claims);
+        //this.claims = new HashMap<String, Object>(claims);
     }
 
     /**
