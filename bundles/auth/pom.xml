@@ -17,6 +17,7 @@
 
   <modules>
     <module>org.eclipse.smarthome.auth.jaas</module>
+    <module>org.eclipse.smarthome.auth.jwt</module>	
   </modules>
 
 </project>

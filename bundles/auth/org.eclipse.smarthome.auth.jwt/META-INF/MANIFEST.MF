@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Jwt
+Bundle-SymbolicName: org.eclipse.smarthome.auth.jwt
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.smarthome.auth.jwt.internal.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: org.eclipse.smarthome.auth.jwt
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.smarthome.core.auth,
+  javax.servlet,
+  javax.servlet.http,
+  org.osgi.framework,
+  org.osgi.service.http,
+  org.osgi.service.cm,
+  org.osgi.util.tracker,
+  org.slf4j
