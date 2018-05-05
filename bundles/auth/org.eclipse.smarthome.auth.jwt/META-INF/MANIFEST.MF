@@ -14,4 +14,12 @@ Import-Package: org.eclipse.smarthome.core.auth,
   org.osgi.service.http,
   org.osgi.service.cm,
   org.osgi.util.tracker,
-  org.slf4j
+  org.slf4j,
+  javax.crypto,
+  javax.crypto.interfaces,
+  javax.crypto.spec,
+  javax.net.ssl,
+  javax.security.auth.callback,
+  javax.security.auth.x500,
+  com.nimbusds.jose,
+  com.nimbusds.jose.crypto
