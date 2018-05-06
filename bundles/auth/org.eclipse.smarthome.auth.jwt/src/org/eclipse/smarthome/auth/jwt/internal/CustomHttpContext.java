@@ -28,7 +28,7 @@ import java.security.*;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.*;
-
+    
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -56,7 +56,8 @@ public class CustomHttpContext implements HttpContext {
             throws IOException {
         LOG.info("Handling security now...");
 	LOG.info("Generating jwt");
-	String token = generateJwt("baidi", "alola");
+	//JwtClaims claims = new JwtClaims();       	
+	String token = generateJwt("testuser", "alola");
 	// if(verifyJwt(token)) {
 	//     LOG.info("verification SUCCESS");
 	// } else {
