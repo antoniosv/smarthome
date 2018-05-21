@@ -22,13 +22,15 @@ import java.util.Base64;
 import java.text.ParseException;
 import java.util.StringTokenizer;
 
-import java.security.interfaces.*;
-import javax.crypto.*;
-import java.security.*;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.*;
-    
+//import com.nimbusds.jose.*;
+//import com.nimbusds.jose.crypto.*;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,74 +46,73 @@ public class CustomHttpContext implements HttpContext {
 
     private static final Logger LOG = LoggerFactory.getLogger(CustomHttpContext.class);
 
-    private Bundle bundle;
+    private final Bundle bundle;
     private static KeyPair kp = null;
-    
+
     CustomHttpContext(Bundle bundle) {
-	this.bundle = bundle;
-    }    
+        this.bundle = bundle;
+    }
 
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
             throws IOException {
+	/* This implementation will change accordingly once class-loading problems are solved */  	
         LOG.info("Handling security now...");
-	LOG.info("Generating jwt");
-	//JwtClaims claims = new JwtClaims();       	
-	String token = generateJwt("testuser", "alola");
-	// if(verifyJwt(token)) {
-	//     LOG.info("verification SUCCESS");
-	// } else {
-	//     LOG.info("verification FAILURE");
-	// }
-        return true;
+	if(request.getHeader("Authorization") == null && request.getHeader("Cookie") == null) {
+	    // this should redirect to a login form
+	    LOG.info("No header -- Forbidden access!");
+	    response.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
+	    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+	    return false;
+	}
+	if(basicAuthenticated(request)) {
+	    LOG.info("Basic authentication successful!");
+	    return true;
+	} else {	    
+	    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);	
+	    return false;
+	}
     }
 
     protected KeyPair getKeyPair() {
-	if(kp == null) {
-	    try {
-	    KeyPairGenerator keyGenerator = null;
-	    keyGenerator = KeyPairGenerator.getInstance("RSA");
-	    keyGenerator.initialize(1024);
-	    kp = keyGenerator.genKeyPair();
-	    } catch(NoSuchAlgorithmException e) {}
+        if (kp == null) {
+            try {
+                KeyPairGenerator keyGenerator = null;
+                keyGenerator = KeyPairGenerator.getInstance("RSA");
+                keyGenerator.initialize(1024);
+                kp = keyGenerator.genKeyPair();
+            } catch (NoSuchAlgorithmException e) {
+            }
+        }
+        return kp;
+    }
+
+    protected boolean basicAuthenticated(HttpServletRequest request) {	
+	request.setAttribute(AUTHENTICATION_TYPE, HttpServletRequest.BASIC_AUTH);
+
+	String authHeader = request.getHeader("Authorization");
+	if (authHeader == null) {
+	    return false;
 	}
-	return kp;
+	StringTokenizer tokenizer = new StringTokenizer(authHeader, " ");
+	String authType = tokenizer.nextToken();
+	if (!"Basic".equalsIgnoreCase(authType)) {
+	    return false;
+	}
+	
+	//	LOG.info("Authz header: " +  authHeader);
+	String usernameAndPassword = new String(Base64.getDecoder().decode(authHeader.substring(6).getBytes()));
+	int userNameIndex = usernameAndPassword.indexOf(":");
+	String username = usernameAndPassword.substring(0, userNameIndex);
+	String password = usernameAndPassword.substring(userNameIndex + 1);
+
+	boolean success = ((username.equals("admin") && password.equals("admin")));
+	if(success) {
+	    request.setAttribute(REMOTE_USER, "admin");
+	}
+	return success;
     }
     
-    protected String generateJwt(String username, String claim)  { // throws JOSEException {
-	RSAPublicKey publicKey = (RSAPublicKey)getKeyPair().getPublic();
-	RSAPrivateKey privateKey = (RSAPrivateKey)getKeyPair().getPrivate();
-	// JWSSigner signer = new RSASSASigner(privateKey);
-
-	// // what's the key ID?
-	// JWSObject jwsObject = new JWSObject(
-    	// 				    new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("123").build(),
-    	// 				    new Payload(username));
-    	// jwsObject.sign(signer);
-	String token = "";
-	//token = jwsObject.serialize();	
-	return token;
-	
-    }
-
-    // protected boolean verifyJwt(String token) throws JOSEException{
-    // 	boolean valid = false;
-    // 	RSAPublicKey publicKey = (RSAPublicKey)getKeyPair().getPublic();
-    // 	JWSObject jwsObject = null;
-
-    // 	if(token != null && !token.isEmpty()) {
-    // 	    try {
-    // 		jwsObject = JWSObject.parse(token);
-    // 	    } catch(ParseException e) { LOG.info("problem parsing token: " + token); }
-    // 	}
-    // 	LOG.info("Attempting to verify token...");
-    // 	JWSVerifier verifier = new RSASSAVerifier(publicKey);
-    // 	if(jwsObject != null) {
-    // 	    valid = jwsObject.verify(verifier);
-    // 	    LOG.info("Token Payload: " + jwsObject.getPayload().toString());
-    // 	}	
-    // 	return valid;
-    // }           
 
     @Override
     public URL getResource(final String name) {
@@ -122,5 +123,74 @@ public class CustomHttpContext implements HttpContext {
     public String getMimeType(String s) {
         throw new IllegalStateException("Not allowed!");
     }
+
+    /*
+    protected String generateJwt(String username, String claim) throws JOSEException {
+	RSAPublicKey publicKey = (RSAPublicKey)getKeyPair().getPublic();
+	RSAPrivateKey privateKey = (RSAPrivateKey)getKeyPair().getPrivate();
+	JWSSigner signer = new RSASSASigner(privateKey);
+
+	// what's the key ID?
+	JWSObject jwsObject = new JWSObject(
+    					    new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("123").build(),
+    					    new Payload(username));
+    	jwsObject.sign(signer);
+    	String token = jwsObject.serialize();	
+	return token;
+	
+    }
+
+    protected boolean verifyJwt(String token) throws JOSEException{
+	boolean valid = false;
+	RSAPublicKey publicKey = (RSAPublicKey)getKeyPair().getPublic();
+	JWSObject jwsObject = null;
+
+	if(token != null && !token.isEmpty()) {
+	    try {
+		jwsObject = JWSObject.parse(token);
+	    } catch(ParseException e) { LOG.info("problem parsing token: " + token); }
+	}
+	LOG.info("Before verifier");
+	JWSVerifier verifier = new RSASSAVerifier(publicKey);
+	if(jwsObject != null) {
+	    valid = jwsObject.verify(verifier);
+	    LOG.info("Token Payload: " + jwsObject.getPayload().toString());
+	}	
+	// valid = jwsObject.getPayload().toString().equals("baidi");
+	return valid;
+    }
+
+    protected boolean jwtAuthenticated(HttpServletRequest request) throws JOSEException {
+	String token = "";
+	boolean verified;
+	String authHeader = request.getHeader("Authorization");
+	String cookie = request.getHeader("Cookie");
+
+	LOG.info("trying to do jwt auth...");
+	
+	if (authHeader == null && cookie == null) {
+	    return false;
+	}
+
+	if (cookie != null) {
+	    token = cookie;
+	} else if(authHeader != null) {
+	    StringTokenizer tokenizer = new StringTokenizer(authHeader, " ");
+	    String authType = tokenizer.nextToken();
+	    if ("Bearer".equalsIgnoreCase(authType)) {
+		token = tokenizer.nextToken();
+	    }
+	}  
+	LOG.info("raw token: " + token);
+	verified = verifyJwt(token);
+	if(verified) {
+	    LOG.info("JWT Authentication successful");	    
+	} else {
+	    LOG.info("something didn't work in the jwt authentication");
+	}
+    	return verified;
+    }
+
+    */
 
 }
