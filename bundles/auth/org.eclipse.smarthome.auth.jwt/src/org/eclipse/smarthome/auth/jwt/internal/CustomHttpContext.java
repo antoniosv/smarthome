@@ -58,32 +58,9 @@ public class CustomHttpContext implements HttpContext {
     CustomHttpContext(Bundle bundle) {
         this.bundle = bundle;
     }
-
-    // @Override
-    // public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response)
-    //         throws IOException {
-    //     /* This implementation will change accordingly once class-loading problems are solved */
-    //     LOG.info("Handling security now...");
-    //     if (request.getHeader("Authorization") == null && request.getHeader("Cookie") == null) {
-    //         // this should redirect to a login form
-    //         LOG.info("No header -- Forbidden access!");
-    //         response.addHeader("WWW-Authenticate", "Basic realm=\"Test Realm\"");
-    //         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-    //         return false;
-    //     }
-    //     if (basicAuthenticated(request)) {
-    //         LOG.info("Basic authentication successful!");
-    //         return true;
-    //     } else {
-    //         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-    //         return false;
-    //     }
-    // }
-
+    
     @Override
     public boolean handleSecurity(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
-	//	LOG.info("cookie:" + request.getHeader("cookie"));
-	//LOG.info("Counter: " + counter++);
 	String freshToken = "";
 	if(request.getHeader("Authorization") == null && request.getHeader("Cookie") == null) {
 	    // this should redirect to a login form
@@ -96,12 +73,12 @@ public class CustomHttpContext implements HttpContext {
 	    // try form authentication first
 	    if(formAuthenticated(request)) {
 		freshToken = "";
-		// try {
-		//     freshToken = generateJwt("baidi","admin");
-		//     if(verifyJwt(freshToken)) {
-		// 	LOG.info("token: " + freshToken);
-		// 	response.addHeader("Set-Cookie", freshToken);
-		//     } } catch(JOSEException e) {}		
+		try {
+		    freshToken = generateJwt("test","claim");
+		    if(verifyJwt(freshToken)) {
+			LOG.info("token: " + freshToken);
+			response.addHeader("Set-Cookie", freshToken);
+		    } } catch(JOSEException e) {}		
 	    }
 	    else if(jwtAuthenticated(request)) {
 		return true;		
@@ -109,12 +86,11 @@ public class CustomHttpContext implements HttpContext {
 		LOG.info("trying basic auth now...");
 		freshToken = "";
 		try {
-		    freshToken = generateJwt("baidi","admin");
-		    response.addHeader("Set-Cookie", freshToken);
-		    // if(verifyJwt(freshToken)) {
-		    // 	LOG.info("token: " + freshToken);
-		    // 	response.addHeader("Set-Cookie", freshToken);
-		    // }
+		    freshToken = generateJwt("test","claim");		    
+		    if(verifyJwt(freshToken)) {			 
+		    	LOG.info("token: " + freshToken);
+		    	response.addHeader("Set-Cookie", freshToken);
+		    } else { LOG.info("Token doesnt verify for some reason"); }
 		} catch(JOSEException e) {}
 		return true;
 	    } else {
@@ -192,27 +168,27 @@ public class CustomHttpContext implements HttpContext {
 
     }
 
-    // protected boolean verifyJwt(String token) throws JOSEException {
-    //     boolean valid = false;
-    //     RSAPublicKey publicKey = (RSAPublicKey) getKeyPair().getPublic();
-    //     JWSObject jwsObject = null;
+    protected boolean verifyJwt(String token) throws JOSEException {
+        boolean valid = false;
+	RSAPublicKey publicKey = (RSAPublicKey) getKeyPair().getPublic();
+        JWSObject jwsObject = null;
 
-    //     if (token != null && !token.isEmpty()) {
-    //         try {
-    //             jwsObject = JWSObject.parse(token);
-    //         } catch (ParseException e) {
-    //             LOG.info("problem parsing token: " + token);
-    //         }
-    //     }
-    //     LOG.info("Before verifier");
-    //     JWSVerifier verifier = new RSASSAVerifier(publicKey);
-    //     if (jwsObject != null) {
-    //         valid = jwsObject.verify(verifier);
-    //         LOG.info("Token Payload: " + jwsObject.getPayload().toString());
-    //     }
-    //     // valid = jwsObject.getPayload().toString().equals("baidi");
-    //     return valid;
-    // }
+        if (token != null && !token.isEmpty()) {
+            try {
+                jwsObject = JWSObject.parse(token);
+            } catch (ParseException e) {
+                LOG.info("problem parsing token: " + token);
+            }
+        }
+        LOG.info("Before the verifier");
+	JWSVerifier verifier = new RSASSAVerifier(publicKey);
+        if (jwsObject != null) {
+	    valid = jwsObject.verify(verifier);
+            LOG.info("Token Payload: " + jwsObject.getPayload().toString());
+        }
+	LOG.info("After verifier: " + valid);
+        return valid;
+    }
 
     protected boolean formAuthenticated(HttpServletRequest request) throws JOSEException {
         return false;
@@ -240,8 +216,7 @@ public class CustomHttpContext implements HttpContext {
             }
         }
         LOG.info("raw token: " + token);
-        // verified = verifyJwt(token);
-	verified = false;
+	verified = verifyJwt(token);
         if (verified) {
             LOG.info("JWT Authentication successful");
         } else {
