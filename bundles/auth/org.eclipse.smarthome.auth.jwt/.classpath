@@ -5,5 +5,10 @@
 	<classpathentry kind="src" output="target/classes" path="src/"/>	
 	<classpathentry exported="true" kind="lib" path="lib/nimbus-jose-jwt-5.8.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/json-smart-2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/accessors-smart-1.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcprov-jdk15on-1.59.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/bcpkix-jdk15on-1.59.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jose4j-0.4.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jadler-all-1.1.1.jar"/>	
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

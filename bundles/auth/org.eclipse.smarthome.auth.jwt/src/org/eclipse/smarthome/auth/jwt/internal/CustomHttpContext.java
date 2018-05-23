@@ -44,6 +44,7 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+    
 
 /**
  * A custom http context that does enforces JWT or basic authentication
@@ -95,12 +96,12 @@ public class CustomHttpContext implements HttpContext {
 	    // try form authentication first
 	    if(formAuthenticated(request)) {
 		freshToken = "";
-		try {
-		    freshToken = generateJwt("baidi","admin");
-		    if(verifyJwt(freshToken)) {
-			LOG.info("token: " + freshToken);
-			response.addHeader("Set-Cookie", freshToken);
-		    } } catch(JOSEException e) {}		
+		// try {
+		//     freshToken = generateJwt("baidi","admin");
+		//     if(verifyJwt(freshToken)) {
+		// 	LOG.info("token: " + freshToken);
+		// 	response.addHeader("Set-Cookie", freshToken);
+		//     } } catch(JOSEException e) {}		
 	    }
 	    else if(jwtAuthenticated(request)) {
 		return true;		
@@ -109,10 +110,12 @@ public class CustomHttpContext implements HttpContext {
 		freshToken = "";
 		try {
 		    freshToken = generateJwt("baidi","admin");
-		    if(verifyJwt(freshToken)) {
-			LOG.info("token: " + freshToken);
-			response.addHeader("Set-Cookie", freshToken);
-		    } } catch(JOSEException e) {}
+		    response.addHeader("Set-Cookie", freshToken);
+		    // if(verifyJwt(freshToken)) {
+		    // 	LOG.info("token: " + freshToken);
+		    // 	response.addHeader("Set-Cookie", freshToken);
+		    // }
+		} catch(JOSEException e) {}
 		return true;
 	    } else {
 		LOG.info("Wrong credentials -- Forbidden access!");
@@ -189,27 +192,27 @@ public class CustomHttpContext implements HttpContext {
 
     }
 
-    protected boolean verifyJwt(String token) throws JOSEException {
-        boolean valid = false;
-        RSAPublicKey publicKey = (RSAPublicKey) getKeyPair().getPublic();
-        JWSObject jwsObject = null;
+    // protected boolean verifyJwt(String token) throws JOSEException {
+    //     boolean valid = false;
+    //     RSAPublicKey publicKey = (RSAPublicKey) getKeyPair().getPublic();
+    //     JWSObject jwsObject = null;
 
-        if (token != null && !token.isEmpty()) {
-            try {
-                jwsObject = JWSObject.parse(token);
-            } catch (ParseException e) {
-                LOG.info("problem parsing token: " + token);
-            }
-        }
-        LOG.info("Before verifier");
-        JWSVerifier verifier = new RSASSAVerifier(publicKey);
-        if (jwsObject != null) {
-            valid = jwsObject.verify(verifier);
-            LOG.info("Token Payload: " + jwsObject.getPayload().toString());
-        }
-        // valid = jwsObject.getPayload().toString().equals("baidi");
-        return valid;
-    }
+    //     if (token != null && !token.isEmpty()) {
+    //         try {
+    //             jwsObject = JWSObject.parse(token);
+    //         } catch (ParseException e) {
+    //             LOG.info("problem parsing token: " + token);
+    //         }
+    //     }
+    //     LOG.info("Before verifier");
+    //     JWSVerifier verifier = new RSASSAVerifier(publicKey);
+    //     if (jwsObject != null) {
+    //         valid = jwsObject.verify(verifier);
+    //         LOG.info("Token Payload: " + jwsObject.getPayload().toString());
+    //     }
+    //     // valid = jwsObject.getPayload().toString().equals("baidi");
+    //     return valid;
+    // }
 
     protected boolean formAuthenticated(HttpServletRequest request) throws JOSEException {
         return false;
@@ -237,7 +240,8 @@ public class CustomHttpContext implements HttpContext {
             }
         }
         LOG.info("raw token: " + token);
-        verified = verifyJwt(token);
+        // verified = verifyJwt(token);
+	verified = false;
         if (verified) {
             LOG.info("JWT Authentication successful");
         } else {
