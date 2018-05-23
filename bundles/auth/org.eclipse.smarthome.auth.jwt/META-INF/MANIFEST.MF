@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Bundle-ClassPath: lib/nimbus-jose-jwt-5.8.jar,lib/json-smart-2.3.jar,lib/jcip-annotations-1.0.jar,.
+Bundle-ClassPath: .,lib/nimbus-jose-jwt-5.8.jar,json-smart-2.3.jar
 Bundle-ManifestVersion: 2
 Bundle-Name: Jwt
 Bundle-SymbolicName: org.eclipse.smarthome.auth.jwt
